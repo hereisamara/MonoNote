@@ -10,6 +10,7 @@ const Editor = {
     blocks: [],
     currentBlockIndex: -1,
     saveTimeout: null,
+    selectedBlocks: new Set(), // Track selected block indices
 
     /**
      * Initialize the editor
@@ -65,6 +66,7 @@ const Editor = {
     loadPage(page) {
         this.titleInput.value = page.title || '';
         this.blocks = [];
+        this.selectedBlocks.clear(); // Clear any previous selection
         this.blockEditor.innerHTML = '';
 
         // Parse content into blocks (split by newlines)
@@ -139,6 +141,22 @@ const Editor = {
         item.className = 'block-item';
         item.dataset.index = index;
 
+        // Check if this block is selected
+        if (this.selectedBlocks.has(index)) {
+            item.classList.add('selected');
+        }
+
+        // Selection checkbox (hidden by default, shown on hover)
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'block-checkbox';
+        checkbox.checked = this.selectedBlocks.has(index);
+        checkbox.addEventListener('change', (e) => {
+            e.stopPropagation();
+            this.toggleBlockSelection(index, checkbox.checked);
+        });
+        checkbox.addEventListener('click', (e) => e.stopPropagation());
+
         // Drag handle
         const handle = document.createElement('div');
         handle.className = 'block-handle';
@@ -166,11 +184,94 @@ const Editor = {
             this.editBlock(index);
         });
 
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'block-delete-btn';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.title = 'Delete block';
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.deleteBlock(index);
+        });
+
         content.appendChild(rendered);
+        item.appendChild(checkbox);
         item.appendChild(handle);
         item.appendChild(content);
+        item.appendChild(deleteBtn);
 
         return item;
+    },
+
+    /**
+     * Toggle block selection
+     * @param {number} index - Block index
+     * @param {boolean} selected - Selection state
+     */
+    toggleBlockSelection(index, selected) {
+        if (selected) {
+            this.selectedBlocks.add(index);
+        } else {
+            this.selectedBlocks.delete(index);
+        }
+
+        // Update block visual state
+        const blockEl = this.blockEditor.querySelector(`[data-index="${index}"]`);
+        if (blockEl) {
+            blockEl.classList.toggle('selected', selected);
+        }
+
+        // Update delete selected button visibility
+        this.updateBulkDeleteButton();
+    },
+
+    /**
+     * Update bulk delete button visibility
+     */
+    updateBulkDeleteButton() {
+        let btn = document.getElementById('deleteSelectedBtn');
+
+        if (this.selectedBlocks.size > 0) {
+            if (!btn) {
+                btn = document.createElement('button');
+                btn.id = 'deleteSelectedBtn';
+                btn.className = 'delete-selected-btn';
+                btn.addEventListener('click', () => this.deleteSelectedBlocks());
+                document.querySelector('.page-header').appendChild(btn);
+            }
+            btn.textContent = `Delete (${this.selectedBlocks.size})`;
+            btn.classList.remove('hidden');
+        } else if (btn) {
+            btn.classList.add('hidden');
+        }
+    },
+
+    /**
+     * Delete all selected blocks
+     */
+    deleteSelectedBlocks() {
+        if (this.selectedBlocks.size === 0) return;
+
+        // Convert to array and sort descending to delete from end first
+        const indices = Array.from(this.selectedBlocks).sort((a, b) => b - a);
+
+        // Delete each block
+        indices.forEach(index => {
+            if (this.blocks.length > 1) {
+                this.blocks.splice(index, 1);
+            } else {
+                // Last block - just clear it
+                this.blocks[0].content = '';
+            }
+        });
+
+        // Clear selection
+        this.selectedBlocks.clear();
+
+        // Re-render
+        this.renderAllBlocks();
+        this.updateBulkDeleteButton();
+        this.save();
     },
 
     /**
