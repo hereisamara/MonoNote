@@ -1059,6 +1059,7 @@ body {
 }
 
 .block-content {
+    flex: 1;
     padding: 4px 8px;
     border-radius: var(--radius-sm);
     min-height: 28px;
