@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotionLite - Your Personal Notes</title>
+    <meta name="description" content="A lightweight Notion clone with markdown support, voice memos, and page linking">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Marked.js for markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">📝</span>
+                    <span class="logo-text">NotionLite</span>
+                </div>
+            </div>
+
+            <!-- New buttons -->
+            <div class="sidebar-actions">
+                <button class="action-btn" id="newPageBtn">
+                    <span class="icon">+</span>
+                    <span>New Page</span>
+                </button>
+                <button class="action-btn secondary" id="newFolderBtn">
+                    <span class="icon">📁</span>
+                    <span>New Folder</span>
+                </button>
+            </div>
+
+            <!-- Search -->
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search pages...">
+            </div>
+
+            <!-- Folder and page tree -->
+            <nav class="nav-tree" id="navTree">
+                <!-- Dynamically populated -->
+            </nav>
+        </aside>
+
+        <!-- Main content -->
+        <main class="main-content">
+            <!-- Top bar -->
+            <header class="top-bar">
+                <div class="breadcrumb" id="breadcrumb">
+                    <!-- Dynamically populated -->
+                </div>
+                <div class="top-bar-actions">
+                    <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme">◐</button>
+                    <button class="icon-btn" id="toggleSidebarBtn" title="Toggle Sidebar">☰</button>
+                </div>
+            </header>
+
+            <!-- Editor area -->
+            <div class="editor-container" id="editorContainer">
+                <!-- Welcome screen -->
+                <div class="welcome-screen" id="welcomeScreen">
+                    <div class="welcome-content">
+                        <h1>Welcome to NotionLite</h1>
+                        <p>Create a new page or select an existing one to get started.</p>
+                        <button class="primary-btn" id="welcomeNewPageBtn">Create Your First Page</button>
+                    </div>
+                </div>
+
+                <!-- Editor (hidden by default) -->
+                <div class="editor-wrapper hidden" id="editorWrapper">
+                    <!-- Page title -->
+                    <input type="text" class="page-title-input" id="pageTitleInput" placeholder="Untitled">
+
+                    <!-- Voice memo section -->
+                    <div class="voice-section">
+                        <div class="voice-controls">
+                            <select class="language-select" id="languageSelect">
+                                <option value="en-US">English (US)</option>
+                                <option value="en-GB">English (UK)</option>
+                                <option value="es-ES">Spanish</option>
+                                <option value="fr-FR">French</option>
+                                <option value="de-DE">German</option>
+                                <option value="it-IT">Italian</option>
+                                <option value="pt-BR">Portuguese (Brazil)</option>
+                                <option value="zh-CN">Chinese (Simplified)</option>
+                                <option value="zh-TW">Chinese (Traditional)</option>
+                                <option value="ja-JP">Japanese</option>
+                                <option value="ko-KR">Korean</option>
+                                <option value="ru-RU">Russian</option>
+                                <option value="ar-SA">Arabic</option>
+                                <option value="hi-IN">Hindi</option>
+                                <option value="th-TH">Thai</option>
+                                <option value="vi-VN">Vietnamese</option>
+                                <option value="my-MM">Myanmar (Burmese)</option>
+                            </select>
+                            <button class="voice-btn" id="recordBtn" title="Record Voice Memo">
+                                <span class="record-icon">🎤</span>
+                                <span class="record-text">Record</span>
+                            </button>
+                            <button class="voice-btn stop hidden" id="stopBtn" title="Stop Recording">
+                                <span class="stop-icon">⏹</span>
+                                <span class="stop-text">Stop</span>
+                            </button>
+                        </div>
+                        <div class="recording-indicator hidden" id="recordingIndicator">
+                            <span class="pulse"></span>
+                            <span>Recording...</span>
+                        </div>
+                        <div class="transcript-preview hidden" id="transcriptPreview">
+                            <p id="transcriptText"></p>
+                            <div class="transcript-actions">
+                                <button class="small-btn" id="insertTranscriptBtn">Insert into Editor</button>
+                                <button class="small-btn secondary" id="discardTranscriptBtn">Discard</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice memos list -->
+                    <div class="voice-memos-list hidden" id="voiceMemosList">
+                        <h4>Voice Memos</h4>
+                        <div id="memosContainer"></div>
+                    </div>
+
+                    <!-- Notion-like Block Editor -->
+                    <div class="block-editor" id="blockEditor">
+                        <!-- Blocks will be dynamically added here -->
+                    </div>
+
+                    <!-- Hidden textarea to store raw content -->
+                    <textarea class="hidden-content" id="hiddenContent" style="display:none;"></textarea>
+
+                    <!-- Backlinks section -->
+                    <div class="backlinks-section" id="backlinksSection">
+                        <h4>Backlinks</h4>
+                        <div class="backlinks-list" id="backlinksList">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Context menu -->
+    <div class="context-menu hidden" id="contextMenu">
+        <button class="context-item" data-action="rename">✏️ Rename</button>
+        <button class="context-item" data-action="move">📂 Move to...</button>
+        <button class="context-item danger" data-action="delete">🗑️ Delete</button>
+    </div>
+
+    <!-- Move modal -->
+    <div class="modal hidden" id="moveModal">
+        <div class="modal-content">
+            <h3>Move to Folder</h3>
+            <div class="folder-select-list" id="folderSelectList"></div>
+            <div class="modal-actions">
+                <button class="small-btn secondary" id="cancelMoveBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input modal (for creating/renaming) -->
+    <div class="modal hidden" id="inputModal">
+        <div class="modal-content">
+            <h3 id="inputModalTitle">Enter Name</h3>
+            <input type="text" class="modal-input" id="modalInput" placeholder="Enter name...">
+            <div class="modal-actions">
+                <button class="small-btn secondary" id="cancelInputBtn">Cancel</button>
+                <button class="small-btn" id="confirmInputBtn">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm modal (for delete) -->
+    <div class="modal hidden" id="confirmModal">
+        <div class="modal-content">
+            <h3 id="confirmModalTitle">Confirm</h3>
+            <p id="confirmModalMessage">Are you sure?</p>
+            <div class="modal-actions">
+                <button class="small-btn secondary" id="cancelConfirmBtn">Cancel</button>
+                <button class="small-btn danger-btn" id="confirmActionBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="storage.js"></script>
+    <script src="sidebar.js"></script>
+    <script src="editor.js"></script>
+    <script src="linking.js"></script>
+    <script src="voice.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
