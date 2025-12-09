@@ -11,7 +11,7 @@ const App = {
      * Initialize the application
      */
     init() {
-        console.log('NotionLite initializing...');
+        console.log('MonoNote initializing...');
 
         // Initialize theme
         this.initTheme();
@@ -20,6 +20,7 @@ const App = {
         Sidebar.init();
         Editor.init();
         Voice.init();
+        LLM.init();
 
         // Bind theme toggle
         document.getElementById('themeToggleBtn').addEventListener('click', () => {
@@ -38,7 +39,7 @@ const App = {
             this.openPage(sortedPages[0].id);
         }
 
-        console.log('NotionLite ready!');
+        console.log('MonoNote ready!');
     },
 
     /**
