@@ -1,12 +1,13 @@
-# NotionLite
+# MonoNote
 
-A minimal, browser-based note-taking app inspired by Notion. Built with pure HTML, CSS, and JavaScript—no frameworks, no backend, no dependencies.
+A minimal, monochrome note-taking app with AI features. Built with pure HTML, CSS, and JavaScript—no frameworks, no backend.
 
-![NotionLite Screenshot](screenshots/dark-theme.png)
+![MonoNote Screenshot](screenshots/dark-theme.png)
 
 ## ✨ Features
 
-- **📝 Block-Based Editor** — Notion-like inline editing with automatic markdown rendering
+- **📝 Block-Based Editor** — Notion-like inline editing with markdown rendering
+- **🤖 AI Summarize** — Summarize notes with OpenAI, Gemini, or Claude
 - **🎤 Voice Memos** — Record audio with speech-to-text in 17+ languages  
 - **🔗 Page Linking** — Link pages with `[[Page Name]]` syntax and view backlinks
 - **📁 Folders** — Organize notes with hierarchical folders
@@ -64,6 +65,13 @@ Type `[[Page Name]]` to create a link to another page. Links are clickable and b
 - Click **+** on a folder to add a page directly inside
 - Right-click for rename/move/delete options
 
+### AI Summarization
+1. Click ⚙️ in the top bar to open **AI Settings**
+2. Select your provider (OpenAI, Gemini, or Claude)
+3. Enter your API key and save
+4. Open a note and click **✨ Summarize**
+5. A summary will be added at the top of your note
+
 ## 🎨 Theme
 
 The app uses a monochrome design:
@@ -84,6 +92,7 @@ notion-lite/
 ├── editor.js       # Block-based markdown editor
 ├── linking.js      # [[Page]] link system
 ├── voice.js        # Voice recording & speech-to-text
+├── llm.js          # AI summarization (OpenAI/Gemini/Claude)
 └── screenshots/    # Screenshots for README
 ```
 

@@ -1,4 +1,4 @@
-# Contributing to NotionLite
+# Contributing to MonoNote
 
 Thanks for your interest in contributing! Here's how you can help.
 
