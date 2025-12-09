@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NotionLite - Your Personal Notes</title>
-    <meta name="description" content="A lightweight Notion clone with markdown support, voice memos, and page linking">
+    <title>MonoNote - Your Personal Notes</title>
+    <meta name="description" content="A minimal monochrome note-taking app with markdown, voice memos, and AI features">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Marked.js for markdown parsing -->
@@ -19,7 +19,7 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <span class="logo-icon">📝</span>
-                    <span class="logo-text">NotionLite</span>
+                    <span class="logo-text">MonoNote</span>
                 </div>
             </div>
 
@@ -54,6 +54,7 @@
                     <!-- Dynamically populated -->
                 </div>
                 <div class="top-bar-actions">
+                    <button class="icon-btn" id="llmSettingsBtn" title="AI Settings">⚙</button>
                     <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme">◐</button>
                     <button class="icon-btn" id="toggleSidebarBtn" title="Toggle Sidebar">☰</button>
                 </div>
@@ -72,8 +73,13 @@
 
                 <!-- Editor (hidden by default) -->
                 <div class="editor-wrapper hidden" id="editorWrapper">
-                    <!-- Page title -->
-                    <input type="text" class="page-title-input" id="pageTitleInput" placeholder="Untitled">
+                    <!-- Page header with title and actions -->
+                    <div class="page-header">
+                        <input type="text" class="page-title-input" id="pageTitleInput" placeholder="Untitled">
+                        <button class="ai-actions-btn" id="aiActionsBtn" title="AI Actions">
+                            <span>✨</span> AI Actions
+                        </button>
+                    </div>
 
                     <!-- Voice memo section -->
                     <div class="voice-section">
@@ -187,12 +193,46 @@
         </div>
     </div>
 
+    <!-- LLM Settings Modal -->
+    <div class="modal hidden" id="llmSettingsModal">
+        <div class="modal-content">
+            <h3>AI Settings</h3>
+            <div class="settings-group">
+                <label for="llmProviderSelect">Provider</label>
+                <select id="llmProviderSelect" class="settings-select">
+                    <option value="openai">OpenAI (GPT-3.5)</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="anthropic">Anthropic Claude</option>
+                </select>
+            </div>
+            <div class="settings-group">
+                <label for="llmApiKeyInput">API Key</label>
+                <input type="password" id="llmApiKeyInput" class="modal-input" placeholder="Enter your API key...">
+            </div>
+            <p class="settings-hint">Your API key is stored locally in your browser.</p>
+            <div class="modal-actions">
+                <button class="small-btn secondary" id="cancelLLMSettingsBtn">Cancel</button>
+                <button class="small-btn" id="saveLLMSettingsBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Loading Overlay -->
+    <div class="ai-loading-overlay hidden" id="aiLoadingOverlay">
+        <div class="ai-loading-content">
+            <div class="ai-loading-spinner"></div>
+            <p class="ai-loading-text">AI is thinking...</p>
+            <p class="ai-loading-subtext">This may take a few seconds</p>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="storage.js"></script>
     <script src="sidebar.js"></script>
     <script src="editor.js"></script>
     <script src="linking.js"></script>
     <script src="voice.js"></script>
+    <script src="llm.js"></script>
     <script src="app.js"></script>
 </body>
 
