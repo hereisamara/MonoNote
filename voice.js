@@ -9,6 +9,7 @@ const Voice = {
     isRecording: false,
     currentTranscript: '',
     currentAudioBlob: null,
+    finalTranscripts: [], // Array to accumulate final speech results
 
     /**
      * Initialize voice module
@@ -122,30 +123,36 @@ const Voice = {
         this.recognition = new SpeechRecognition();
         this.recognition.continuous = true;
         this.recognition.interimResults = true;
+        this.recognition.maxAlternatives = 1;
         this.recognition.lang = document.getElementById('languageSelect').value;
 
         this.currentTranscript = '';
+        this.finalTranscripts = []; // Store all final transcripts
 
         this.recognition.onresult = (event) => {
             let interimTranscript = '';
-            let finalTranscript = '';
 
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
-                if (event.results[i].isFinal) {
-                    finalTranscript += transcript + ' ';
+            // Process all results from the beginning
+            for (let i = 0; i < event.results.length; i++) {
+                const result = event.results[i];
+                const transcript = result[0].transcript;
+
+                if (result.isFinal) {
+                    // Store final result if not already stored
+                    if (i >= this.finalTranscripts.length) {
+                        this.finalTranscripts.push(transcript);
+                    }
                 } else {
-                    interimTranscript += transcript;
+                    interimTranscript = transcript;
                 }
             }
 
-            if (finalTranscript) {
-                this.currentTranscript += finalTranscript;
-            }
+            // Combine all final transcripts + current interim
+            this.currentTranscript = this.finalTranscripts.join(' ');
 
             // Update transcript preview
-            document.getElementById('transcriptText').textContent =
-                this.currentTranscript + interimTranscript;
+            const displayText = this.currentTranscript + (interimTranscript ? ' ' + interimTranscript : '');
+            document.getElementById('transcriptText').textContent = displayText.trim();
         };
 
         this.recognition.onerror = (event) => {
@@ -153,16 +160,16 @@ const Voice = {
             if (event.error === 'not-allowed') {
                 alert('Microphone access denied. Please allow microphone permissions.');
             }
+            // On no-speech error, keep trying if still recording
+            if (event.error === 'no-speech' && this.isRecording) {
+                this.restartRecognition();
+            }
         };
 
         this.recognition.onend = () => {
+            // Restart if still recording (speech recognition auto-stops after silence)
             if (this.isRecording) {
-                // Restart if still recording (recognition times out)
-                try {
-                    this.recognition.start();
-                } catch (e) {
-                    // Ignore if already started
-                }
+                this.restartRecognition();
             }
         };
 
@@ -171,6 +178,21 @@ const Voice = {
         } catch (e) {
             console.error('Could not start speech recognition:', e);
         }
+    },
+
+    /**
+     * Restart speech recognition with a small delay
+     */
+    restartRecognition() {
+        setTimeout(() => {
+            if (this.isRecording && this.recognition) {
+                try {
+                    this.recognition.start();
+                } catch (e) {
+                    // Already started - ignore
+                }
+            }
+        }, 100);
     },
 
     /**
@@ -280,6 +302,7 @@ const Voice = {
     discardTranscript() {
         this.currentTranscript = '';
         this.currentAudioBlob = null;
+        this.finalTranscripts = []; // Reset accumulated transcripts
         document.getElementById('transcriptPreview').classList.add('hidden');
         document.getElementById('transcriptText').textContent = '';
     },
